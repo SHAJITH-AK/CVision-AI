@@ -1,146 +1,305 @@
-# Resume Analyzer & Job Suitability Predictor
+# CVision AI — Resume Analyzer & Job Suitability Predictor
 
-A locally runnable Flask web app that reads a PDF resume, predicts the closest job category with a machine-learning classifier, and scores how well the resume evidences the skills for a chosen role (or a pasted job description).
+An AI-powered resume analysis web application built with Flask and Machine Learning. CVision AI analyzes PDF resumes, predicts suitable job categories, identifies technical and soft skills, and evaluates how well a resume matches a selected role or job description.
 
-## What it uses (and doesn't)
+## ✨ Features
 
-| Part | Technology |
-|---|---|
-| Category prediction | TF-IDF (word 1-2 grams) + **Logistic Regression** or **calibrated Linear SVM**, whichever scores better in cross-validation |
-| Skill extraction | Curated skill lexicon with alias and boundary-aware matching |
-| Suitability score | Documented weighted heuristic (see below) - *not* a trained model |
-| PDF text | pdfplumber |
-| Frontend | HTML, CSS, JavaScript, Chart.js (bundled locally, so it works offline) |
+- **PDF Resume Upload:** Upload a resume in PDF format using the web interface.
+- **Job Category Prediction:** Predicts the most relevant job category using a trained Machine Learning classifier.
+- **Top-3 Predictions:** View the leading job-category predictions and their model probabilities.
+- **Skill Extraction:** Detects technical skills and soft skills from extracted resume text.
+- **Job Suitability Score:** Calculates a score from 0–100 using skill matches, text similarity, experience indicators, education, projects, and certifications.
+- **Job Description Matching:** Analyze a resume against a selected role or a custom job description.
+- **Skill Gap Analysis:** Identify skills detected in the resume and skills that were not found.
+- **Resume Quality Checks:** View feedback and suggestions to improve resume content.
+- **Interactive Visualizations:** Explore skill matches, score components, and suitability across roles.
+- **Model Performance Dashboard:** Review evaluation metrics, class distribution, and the confusion matrix.
+- **Privacy-Conscious Processing:** Temporary uploaded PDF files are deleted after parsing, and resume text is not intentionally stored server-side.
 
-This is **classical machine learning, not deep learning**. Sentence Transformers / BERT are not used; the code is structured so they could be added if you have enough real labelled data.
+## 🧠 Machine Learning Approach
 
-## IMPORTANT: about the dataset
+CVision AI uses a classical Machine Learning pipeline rather than a deep learning model.
 
-No real, redistributable resume dataset ships with this project. `dataset/resumes.csv` is **synthetic** (1,280 template-generated resumes, 160 per role, produced by `generate_dataset.py`). It is labelled as synthetic in `dataset/dataset_info.json` and on the Model performance page. Metrics measured on it (about 85% accuracy) describe separation of generated text and will be optimistic for real resumes. For real use, put real labelled resumes in `dataset/resumes.csv` (columns `resume_text`, `category`) and retrain.
+### Text Classification
 
-## Features
+1. Extract text from the uploaded PDF using `pdfplumber`.
+2. Clean and normalize the extracted text.
+3. Convert the text into numerical features using TF-IDF with word unigrams and bigrams.
+4. Pass the features to the trained classification pipeline.
+5. Predict the most relevant job category and return the model's class probabilities.
 
-- Drag-and-drop PDF upload with validation, size/page limits, text preview and clear errors
-- Scanned/image PDFs detected and explained (OCR is not included)
-- 8 target roles plus "Other" (requires a pasted job description), or paste any job description
-- Predicted category with top-3 probabilities, matched/missing skills, evidence snippets, resume-quality checks, suggestions
-- Charts: required-skill match, score components, fit across all roles
-- Model performance page rendered from real evaluation output (accuracy, precision, recall, F1, confusion matrix, class distribution, limitations)
+### Model Selection
 
-## Requirements
+Two candidate models are compared during training:
 
-- Python 3.10 - 3.13 (developed on 3.12)
-- Windows, macOS or Linux
+- **TF-IDF + Logistic Regression**
+- **TF-IDF + Calibrated Linear Support Vector Machine (SVM)**
 
-## Setup (Windows, VS Code terminal / PowerShell)
+The project selects the candidate with the better cross-validation macro F1 score.
 
-```powershell
-cd resume-analyzer
+The currently included model is **TF-IDF + Logistic Regression**.
+
+### Supported Job Categories
+
+- Data Scientist
+- Machine Learning Engineer
+- Python Developer
+- Web Developer
+- Data Analyst
+- Software Engineer
+- Cybersecurity Analyst
+- Cloud Engineer
+
+The application also supports an **Other** option for custom job-description analysis.
+
+### How the Suitability Score Works
+
+The 0–100 suitability score uses a weighted heuristic based on:
+
+| Component | Weight |
+|---|---:|
+| Required skills | 45% |
+| Preferred skills | 15% |
+| Text similarity | 20% |
+| Experience indicators | 10% |
+| Education, projects, and certifications | 10% |
+
+**Important:** The suitability score is a rule-based estimate, not a trained model output or a probability of getting hired. Missing skills mean they were not detected in the extracted text; they may still be present in the original resume.
+
+## 📊 Model Evaluation
+
+The included evaluation report records the following results:
+
+| Metric | Score |
+|---|---:|
+| Test accuracy | 85.55% |
+| Macro precision | 86.58% |
+| Macro recall | 85.55% |
+| Macro F1 score | 85.59% |
+| Expected calibration error | 3.36% |
+
+### Dataset Disclaimer
+
+The included dataset contains **1,280 synthetic, template-generated resume records**, with 160 records per job category.
+
+These evaluation results measure performance on synthetic demonstration data. They do not establish equivalent performance on real-world resumes. The model should be evaluated on representative, properly labelled real data before being used in recruitment decisions.
+
+## 🛠️ Technologies Used
+
+### Backend and Machine Learning
+- Python
+- Flask
+- Scikit-learn
+- NumPy
+- Pandas
+- Joblib
+- pdfplumber
+
+### Frontend
+- HTML5
+- CSS3
+- JavaScript
+- Chart.js
+
+### Development and Testing
+- Git and GitHub
+- Python virtual environments
+- Python `unittest`
+
+## 📁 Project Structure
+
+```text
+CVision-AI/
+├── app.py
+├── generate_dataset.py
+├── train_model.py
+├── requirements.txt
+├── requirements-dev.txt
+├── README.md
+├── dataset/
+│   ├── dataset_info.json
+│   └── resumes.csv
+├── models/
+│   ├── metrics.json
+│   └── resume_model.joblib
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       ├── analyze.js
+│       ├── main.js
+│       ├── results.js
+│       └── vendor/
+│           └── chart.umd.js
+├── templates/
+│   ├── about.html
+│   ├── analyze.html
+│   ├── base.html
+│   ├── error.html
+│   ├── index.html
+│   ├── model_performance.html
+│   └── results.html
+├── tests/
+│   ├── __init__.py
+│   └── test_pipeline.py
+└── utils/
+    ├── __init__.py
+    ├── job_profiles.py
+    ├── prediction.py
+    ├── resume_parser.py
+    ├── skill_extractor.py
+    └── text_preprocessing.py
+```
+
+## ⚙️ Installation and Setup
+
+### Prerequisites
+
+Install the following before starting:
+
+- Python 3.10–3.13
+- Git
+- A code editor such as Visual Studio Code
+- A modern web browser
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/SHAJITH-AK/CVision-AI.git
+cd CVision-AI
+```
+
+### 2. Create a Virtual Environment
+
+**Windows — Command Prompt**
+
+```bat
 python -m venv venv
 venv\Scripts\activate
+```
+
+**Windows — PowerShell**
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If PowerShell blocks activation: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`, then activate again.
+The trained model and evaluation metrics are already included, so you normally do not need to retrain the model just to run the application.
 
-macOS/Linux: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+### 4. Run the Application
 
-## Dataset and training
-
-A trained model (`models/resume_model.joblib`) and its metrics (`models/metrics.json`) are already included, built with the pinned scikit-learn version. To regenerate everything:
-
-```powershell
-python generate_dataset.py     # rewrites dataset/resumes.csv (synthetic)
-python train_model.py          # trains, compares models, evaluates, saves model + metrics
-```
-
-Training is reproducible (fixed seed 42). `train_model.py`:
-
-1. Cleans data and removes duplicates **before** splitting
-2. Makes a stratified 80/20 train/test split
-3. Compares both candidates with 5-fold CV and grid search on the **training split only** (the TF-IDF vectoriser is inside the pipeline, so it is refit per fold - no leakage)
-4. Evaluates the winner **once** on the untouched test split
-5. Saves the pipeline and `metrics.json`
-
-The model is loaded once at server start; it is never retrained per request.
-
-## Run the app
-
-```powershell
+```bash
 python app.py
 ```
 
-Open **http://127.0.0.1:5000** in your browser.
+Open the following URL in your browser:
 
-## Run the tests
+**http://127.0.0.1:5000**
 
-```powershell
+Keep the terminal running while using the application.
+
+## 🚀 How to Use
+
+1. Start CVision AI using `python app.py`.
+2. Open the local URL in your browser.
+3. Navigate to the resume analysis page.
+4. Upload a PDF resume.
+5. Select a target job role or provide a custom job description.
+6. Submit the resume for analysis.
+7. Review the predicted category and top-3 model probabilities.
+8. Explore detected skills, missing skill evidence, suitability score, and improvement suggestions.
+9. Open the Model Performance page to inspect the evaluation metrics.
+
+### Upload Limitations
+
+- Accepted file format: PDF
+- Maximum upload size: 5 MB
+- Maximum supported pages: 15
+- Scanned/image-only PDFs may not contain extractable text because OCR is not included.
+
+## 🧪 Testing
+
+Install the development dependencies:
+
+```bash
 pip install -r requirements-dev.txt
+```
+
+Run the test suite:
+
+```bash
 python -m unittest discover -s tests -v
 ```
 
-Tests cover PDF extraction, scanned/fake/oversized files, role validation, job-description mode, score ranges, temp-file cleanup, and that the metrics endpoint returns real evaluation output.
+The tests cover important parts of the resume analysis pipeline, including PDF parsing, upload validation, role selection, score ranges, and metrics responses.
 
-## How the scores work
+## 🔄 Retraining the Model
 
-**Model probability** - the classifier's probability for the predicted *category*. Both candidate models output real probabilities (Logistic Regression natively; the SVM via sigmoid calibration, never raw decision scores). Calibration error (ECE) on the test split is shown next to it. Similarity values are never labelled as confidence.
+To regenerate the synthetic dataset and train a new model:
 
-**Suitability score (0-100)** - weighted sum:
-
-| Component | Weight |
-|---|---|
-| Required skills evidenced in the resume | 45 |
-| Preferred skills evidenced | 15 |
-| TF-IDF cosine similarity to the role profile / job description (similarity / 0.5, capped at 1) | 20 |
-| Experience (section present +0.5, estimated years >=1 +0.25, >=3 +0.25) | 10 |
-| Education (+0.5), projects (+0.3), certifications (+0.2) | 10 |
-
-The weights and the 0.5 similarity cap are judgement calls, not fitted or validated against hiring outcomes. With a pasted job description, every recognised skill in it counts as required. The result is an automated estimate, not a hiring decision, and not a probability of being hired.
-
-"Missing" means *not evidenced in the extracted text*. The skill may be phrased differently or lost in PDF extraction, so quality checks say "Not detected", not "absent".
-
-## Privacy and security
-
-- Uploads are limited to 5 MB, PDF extension **and** `%PDF-` header, max 15 pages
-- Files are written to a randomly named temp file, parsed, and deleted in a `finally` block
-- No resume text is stored server-side; results live in the browser tab's `sessionStorage`
-- All dynamic text is inserted with `textContent` (no HTML injection)
-- Runs on `127.0.0.1` only by default. Do not expose it publicly without adding authentication and HTTPS.
-
-## Project structure
-
-```
-resume-analyzer/
-  app.py                  Flask routes, upload handling, error handlers
-  train_model.py          Training + evaluation script
-  generate_dataset.py     Synthetic dataset generator
-  requirements.txt / requirements-dev.txt
-  models/                 resume_model.joblib, metrics.json
-  dataset/                resumes.csv, dataset_info.json
-  utils/                  resume_parser, text_preprocessing, skill_extractor, job_profiles, prediction
-  templates/              index, analyze, results, model_performance, about, base, error
-  static/                 css/style.css, js/{main,analyze,results}.js, js/vendor/chart.umd.js
-  tests/                  test_pipeline.py
+```bash
+python generate_dataset.py
+python train_model.py
 ```
 
-## Troubleshooting
+The training process compares the candidate models and saves the selected pipeline and updated evaluation metrics.
 
-| Problem | Fix |
-|---|---|
-| "Trained model not found" | Run `python train_model.py` |
-| Warning about scikit-learn version when loading the model | Install the pinned versions, or retrain with your installed version |
-| "Very little text could be extracted" | The PDF is a scan/image. Export a text-based PDF from Word or Google Docs |
-| Skills missing from a multi-column resume | PDF extraction may scramble columns; check the text preview, try a single-column layout |
-| `ModuleNotFoundError` | Activate the virtual environment, then `pip install -r requirements.txt` |
-| Port 5000 in use | Change `port=5000` at the bottom of `app.py` |
-| `pip` can't find a pinned version for your Python | Use Python 3.10-3.13, or relax pins in `requirements.txt` and retrain |
+For experiments with real labelled data, prepare `dataset/resumes.csv` with these columns:
 
-## Replace or retrain the model
+```csv
+resume_text,category
+"Python, SQL, statistics and data analysis experience","Data Analyst"
+"Software development, algorithms and unit testing","Software Engineer"
+```
 
-1. Put your data in `dataset/resumes.csv` with columns `resume_text` and `category`. Category names should match the roles in `utils/job_profiles.py` (edit that file to add roles and their required/preferred skills).
-2. Delete or edit `dataset/dataset_info.json` (the app labels data as synthetic only if it says so).
-3. `python train_model.py`, then restart `python app.py`.
+These rows are illustrative examples only. Use representative, appropriately licensed data for actual training and evaluation.
 
-## Extending skills and roles
+## 🔐 Privacy and Security
 
-Add skills and aliases in `utils/skill_extractor.py`; change role requirements in `utils/job_profiles.py`.
+- Uploads are validated for PDF format and size.
+- Temporary PDF copies are deleted after parsing.
+- Resume text is not intentionally stored server-side by the application.
+- Analysis results are held in the browser's session storage.
+- Uploaded resumes may contain personal information; use test documents when experimenting.
+
+**Before public deployment:** The development server binds to localhost by default. A production deployment requires an appropriate production server, HTTPS, and suitable access controls and operational safeguards. Do not treat the current application as a secure recruitment system without additional review.
+
+## 🛣️ Future Improvements
+
+- Add OCR support for scanned resumes.
+- Evaluate the classifier on a properly labelled real-world dataset.
+- Expand job categories and skill dictionaries.
+- Improve support for multi-column PDF layouts.
+- Add secure authentication and privacy controls for hosted deployments.
+- Add more comprehensive automated tests and monitoring.
+
+## ⚠️ Disclaimer
+
+CVision AI is an educational Machine Learning project intended for resume analysis and career guidance. Predictions and suitability scores may be inaccurate or incomplete. They should not be used as the sole basis for hiring, rejection, or other consequential employment decisions.
+
+## 👨‍💻 Author
+
+**Shajith Abdul Kareem**
+
+GitHub: [@SHAJITH-AK](https://github.com/SHAJITH-AK)
+
+To Contact: shajith8047@gmail.com
+
+## 📄 License
+
+No license is specified in this repository yet. Add a suitable open-source license if you want others to have explicit permission to reuse, modify, and distribute the project.
