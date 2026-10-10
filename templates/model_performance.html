@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Model performance{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Model performance</h1>
+<p>Every number on this page is read from <code>models/metrics.json</code>, written by <code>train_model.py</code>.</p></header>
+
+{% if not m %}
+<div class="card empty big"><h2>No evaluation found</h2>
+<p>Train the model to generate metrics: <code>python train_model.py</code></p></div>
+{% else %}
+{% if m.dataset.type == 'synthetic' %}
+<div class="alert warn"><strong>Synthetic training data.</strong> This model was trained on {{ m.dataset.records_after_cleaning }} template-generated resumes, not real candidates. These scores describe how well it separates generated resumes and will probably be higher than real-world performance. Replace <code>dataset/resumes.csv</code> with real labelled resumes and retrain for meaningful numbers.</div>
+{% endif %}
+
+<section class="stats">
+  <div class="card stat"><span class="muted">Selected algorithm</span><strong>{{ m.selected_model }}</strong></div>
+  <div class="card stat"><span class="muted">Accuracy (test)</span><strong>{{ '%.1f' % (m.test_metrics.accuracy*100) }}%</strong></div>
+  <div class="card stat"><span class="muted">Macro precision</span><strong>{{ '%.1f' % (m.test_metrics.macro.precision*100) }}%</strong></div>
+  <div class="card stat"><span class="muted">Macro recall</span><strong>{{ '%.1f' % (m.test_metrics.macro.recall*100) }}%</strong></div>
+  <div class="card stat"><span class="muted">Macro F1</span><strong>{{ '%.1f' % (m.test_metrics.macro.f1*100) }}%</strong></div>
+  <div class="card stat"><span class="muted">Calibration error (ECE)</span><strong>{{ '%.3f' % m.test_metrics.expected_calibration_error }}</strong></div>
+</section>
+
+<section class="grid-2">
+  <div class="card"><h2>Method</h2>
+    <ul class="plain">
+      <li>Records after cleaning and de-duplication: <strong>{{ m.dataset.records_after_cleaning }}</strong> (raw: {{ m.dataset.records_raw }}).</li>
+      <li>Split: stratified hold-out, {{ m.split.train_records }} train / {{ m.split.test_records }} test (random state {{ m.split.random_state }}).</li>
+      <li>Model choice: {{ m.split.selection }}.</li>
+      <li>The TF-IDF vectoriser is fitted inside each CV fold and on the training split only, so test data never influences fitting.</li>
+      <li>Trained {{ m.trained_at_utc }} with scikit-learn {{ m.sklearn_version }}.</li>
+    </ul>
+    <h3>Candidates compared (5-fold CV, macro-F1)</h3>
+    <table><thead><tr><th>Model</th><th>CV macro-F1</th><th>Best parameters</th></tr></thead><tbody>
+    {% for c in m.candidates %}<tr><td>{{ c.model }}{% if c.model == m.selected_model %} <em>(selected)</em>{% endif %}</td><td>{{ '%.3f' % c.cv_macro_f1 }}</td><td><code>{{ c.best_params }}</code></td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div class="card"><h2>Class distribution</h2><div class="chart"><canvas id="chDist" aria-label="Records per category"></canvas></div></div>
+</section>
+
+<section class="card"><h2>Per-category results (test split)</h2>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Precision</th><th>Recall</th><th>F1</th><th>Test records</th></tr></thead><tbody>
+{% for r in m.per_class %}<tr><td>{{ r.category }}</td><td>{{ '%.2f' % r.precision }}</td><td>{{ '%.2f' % r.recall }}</td><td>{{ '%.2f' % r.f1 }}</td><td>{{ r.support }}</td></tr>{% endfor %}
+</tbody></table></div></section>
+
+<section class="card"><h2>Confusion matrix (test split)</h2>
+<p class="muted">Rows are the true category, columns the predicted one. Darker cells hold more resumes.</p>
+{% set cm = m.confusion_matrix %}
+<div class="table-wrap"><table class="cm"><thead><tr><th></th>{% for l in cm.labels %}<th scope="col"><span>{{ l }}</span></th>{% endfor %}</tr></thead><tbody>
+{% for row in cm.matrix %}{% set i = loop.index0 %}{% set total = row|sum %}
+<tr><th scope="row">{{ cm.labels[i] }}</th>{% for v in row %}<td style="--a: {{ (v/total) if total else 0 }}" class="{{ 'diag' if loop.index0==i }}">{{ v }}</td>{% endfor %}</tr>{% endfor %}
+</tbody></table></div></section>
+
+<section class="card"><h2>Limitations and known weaknesses</h2><ul class="plain">
+<li>{% if m.dataset.type == 'synthetic' %}The training data is synthetic; real resumes vary far more in wording, layout and quality.{% else %}Results depend on how representative the training data is.{% endif %}</li>
+<li>Closely related roles (for example Data Scientist, Machine Learning Engineer and Data Analyst) overlap heavily in vocabulary and are confused most often; see the confusion matrix.</li>
+<li>The model reads vocabulary only. It does not understand seniority, depth of skill, or the quality of the work described.</li>
+<li>The suitability score is a documented heuristic and has not been validated against hiring outcomes. It is not a probability of being hired.</li>
+<li>The "model probability" is the classifier's probability for the predicted <em>category</em>. Its calibration error on the test split is {{ '%.3f' % m.test_metrics.expected_calibration_error }} (0 is perfect), which is only as trustworthy as the test data.</li>
+</ul></section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if m %}
+<script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
+<script>
+  const DIST = {{ m.dataset.class_distribution | tojson }};
+  const ctx = document.getElementById('chDist');
+  new Chart(ctx, {type:'bar', data:{labels:Object.keys(DIST), datasets:[{data:Object.values(DIST), backgroundColor:'#EC4899', borderRadius:6}]},
+    options:{indexAxis:'y', maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}}}});
+</script>
+{% endif %}
+{% endblock %}

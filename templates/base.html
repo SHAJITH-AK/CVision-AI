@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}💗 Resume Analyzer{% endblock %} · Resume Analyzer</title>
+
+  <!-- Pink Resume Analyzer favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <button class="nav-toggle" id="navToggle"
+          aria-label="Open menu" aria-expanded="false"
+          aria-controls="sidebar">
+    <span></span><span></span><span></span>
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span>CVision AI</span>
+    </a>
+
+    <nav aria-label="Main">
+      <a href="{{ url_for('index') }}" class="{{ 'on' if active=='home' }}">🏠 Home</a>
+      <a href="{{ url_for('analyze_page') }}" class="{{ 'on' if active=='analyze' }}">📄 Analyze a resume</a>
+      <a href="{{ url_for('results_page') }}" class="{{ 'on' if active=='results' }}">📊 Latest results</a>
+      <a href="{{ url_for('model_performance') }}" class="{{ 'on' if active=='model' }}">🧠 Model performance</a>
+      <a href="{{ url_for('about') }}" class="{{ 'on' if active=='about' }}">💡 Methodology</a>
+    </nav>
+
+    <p class="side-note">
+      Your PDF is read in memory, analysed, and deleted straight away.
+      Results stay in this browser tab only.
+    </p>
+  </aside>
+
+  <main id="main" class="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

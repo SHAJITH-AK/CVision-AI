@@ -1,0 +1,225 @@
+{
+  "trained_at_utc": "2026-10-09T18:02:08+00:00",
+  "sklearn_version": "1.8.0",
+  "selected_model": "TF-IDF + Logistic Regression",
+  "candidates": [
+    {
+      "model": "TF-IDF + Logistic Regression",
+      "cv_macro_f1": 0.8547,
+      "best_params": {
+        "clf__C": 20
+      },
+      "fit_seconds": 8.4
+    },
+    {
+      "model": "TF-IDF + Linear SVM (calibrated)",
+      "cv_macro_f1": 0.8486,
+      "best_params": {
+        "clf__estimator__C": 2
+      },
+      "fit_seconds": 5.4
+    }
+  ],
+  "dataset": {
+    "type": "synthetic",
+    "records": 1280,
+    "seed": 42,
+    "note": "Template-generated demonstration data. Not real candidates.",
+    "records_after_cleaning": 1280,
+    "records_raw": 1280,
+    "class_distribution": {
+      "Cloud Engineer": 160,
+      "Data Analyst": 160,
+      "Software Engineer": 160,
+      "Python Developer": 160,
+      "Machine Learning Engineer": 160,
+      "Cybersecurity Analyst": 160,
+      "Web Developer": 160,
+      "Data Scientist": 160
+    }
+  },
+  "split": {
+    "method": "stratified hold-out",
+    "test_size": 0.2,
+    "random_state": 42,
+    "train_records": 1024,
+    "test_records": 256,
+    "selection": "5-fold stratified CV on the training split only; test split used once"
+  },
+  "test_metrics": {
+    "accuracy": 0.8555,
+    "macro": {
+      "precision": 0.8658,
+      "recall": 0.8555,
+      "f1": 0.8559
+    },
+    "weighted": {
+      "precision": 0.8658,
+      "recall": 0.8555,
+      "f1": 0.8559
+    },
+    "expected_calibration_error": 0.0336
+  },
+  "per_class": [
+    {
+      "category": "Cloud Engineer",
+      "precision": 0.8788,
+      "recall": 0.9062,
+      "f1": 0.8923,
+      "support": 32
+    },
+    {
+      "category": "Cybersecurity Analyst",
+      "precision": 0.9412,
+      "recall": 1.0,
+      "f1": 0.9697,
+      "support": 32
+    },
+    {
+      "category": "Data Analyst",
+      "precision": 0.871,
+      "recall": 0.8438,
+      "f1": 0.8571,
+      "support": 32
+    },
+    {
+      "category": "Data Scientist",
+      "precision": 0.65,
+      "recall": 0.8125,
+      "f1": 0.7222,
+      "support": 32
+    },
+    {
+      "category": "Machine Learning Engineer",
+      "precision": 0.8929,
+      "recall": 0.7812,
+      "f1": 0.8333,
+      "support": 32
+    },
+    {
+      "category": "Python Developer",
+      "precision": 0.9583,
+      "recall": 0.7188,
+      "f1": 0.8214,
+      "support": 32
+    },
+    {
+      "category": "Software Engineer",
+      "precision": 0.8966,
+      "recall": 0.8125,
+      "f1": 0.8525,
+      "support": 32
+    },
+    {
+      "category": "Web Developer",
+      "precision": 0.8378,
+      "recall": 0.9688,
+      "f1": 0.8986,
+      "support": 32
+    }
+  ],
+  "confusion_matrix": {
+    "labels": [
+      "Cloud Engineer",
+      "Cybersecurity Analyst",
+      "Data Analyst",
+      "Data Scientist",
+      "Machine Learning Engineer",
+      "Python Developer",
+      "Software Engineer",
+      "Web Developer"
+    ],
+    "matrix": [
+      [
+        29,
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        32,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        27,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        4,
+        26,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        5,
+        25,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        4,
+        0,
+        23,
+        2,
+        3
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        1,
+        26,
+        3
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        31
+      ]
+    ]
+  },
+  "classes": [
+    "Cloud Engineer",
+    "Cybersecurity Analyst",
+    "Data Analyst",
+    "Data Scientist",
+    "Machine Learning Engineer",
+    "Python Developer",
+    "Software Engineer",
+    "Web Developer"
+  ]
+}

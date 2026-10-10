@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Analyze{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Analyze a resume</h1>
+  <p>PDF only, up to {{ max_mb }} MB. The file is not kept after analysis.</p>
+</header>
+
+<div class="grid-2">
+  <section class="card">
+    <h2 class="h3">1. Upload your resume</h2>
+    <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-describedby="dzHelp">
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+      <p><strong>Drag a PDF here</strong> or press to browse</p>
+      <p id="dzHelp" class="muted">Text-based PDF, max {{ max_mb }} MB</p>
+    </div>
+    <div id="fileInfo" class="file-info" hidden>
+      <div><strong id="fileName"></strong><span id="fileMeta" class="muted"></span></div>
+      <button type="button" class="link" id="removeFile">Remove</button>
+    </div>
+    <div id="msg" class="alert" role="alert" hidden></div>
+
+    <h2 class="h3 mt">2. Choose a target</h2>
+    <label for="role">Job role</label>
+    <select id="role">
+      <option value="" disabled selected>Select a job role</option>
+      {% for r in roles %}<option>{{ r }}</option>{% endfor %}
+    </select>
+    <label for="jd">Job description <span class="muted">(optional; required if you choose Other)</span></label>
+    <textarea id="jd" rows="6" maxlength="10000" placeholder="Paste a job description to compare against its skills instead of the standard role profile."></textarea>
+
+    <button class="btn primary wide" id="analyzeBtn" disabled>Analyze Resume</button>
+    <div id="progress" class="progress" hidden><div class="bar"></div><span id="progressLabel">Working…</span></div>
+  </section>
+
+  <section class="card">
+    <h2 class="h3">Extracted text preview</h2>
+    <div id="previewEmpty" class="empty">
+      <p>Once you choose a file, the text we can read from it appears here. If the preview looks wrong or empty, the analysis will be too.</p>
+    </div>
+    <pre id="preview" class="preview" hidden tabindex="0"></pre>
+    <p id="previewNote" class="muted" hidden></p>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/analyze.js') }}"></script>{% endblock %}

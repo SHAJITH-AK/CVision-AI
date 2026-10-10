@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Methodology{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Methodology</h1><p>What the tool does, how each number is produced, and where it can be wrong.</p></header>
+
+<section class="card prose"><h2>Pipeline</h2>
+<ol>
+<li><strong>Extract.</strong> Text is read from the PDF with pdfplumber. If almost no text is found, the file is treated as a scan and you are told so rather than given an empty analysis.</li>
+<li><strong>Clean.</strong> Lower-casing, removing links, emails and phone numbers, and protecting tokens such as C++, C# and Node.js.</li>
+<li><strong>Extract skills.</strong> A curated lexicon is matched against the text. A skill is reported only when its name or a known alias appears in the resume (or the job description).</li>
+<li><strong>Classify.</strong> {% if metrics %}{{ metrics.selected_model }}{% else %}A TF-IDF text classifier{% endif %} predicts one of eight job categories. It was chosen over the alternative by cross-validation on training data only.</li>
+<li><strong>Score.</strong> The suitability score below is computed against your selected role profile, or against skills found in the job description you paste.</li>
+</ol></section>
+
+<section class="grid-2">
+<div class="card"><h2>Job suitability score (0–100)</h2>
+<table><thead><tr><th>Component</th><th>Weight</th></tr></thead><tbody>
+<tr><td>Required skills evidenced</td><td>{{ weights.required_skills }}</td></tr>
+<tr><td>Preferred skills evidenced</td><td>{{ weights.preferred_skills }}</td></tr>
+<tr><td>TF-IDF cosine similarity to the role or job description</td><td>{{ weights.text_similarity }}</td></tr>
+<tr><td>Experience (section present, plus estimated years)</td><td>{{ weights.experience }}</td></tr>
+<tr><td>Education, projects, certifications</td><td>{{ weights.education_projects }}</td></tr></tbody></table>
+<p>Similarity is divided by {{ cap }} and capped at 1, so a cosine of {{ cap }} or more earns full credit. The weights and cap are judgement calls, not fitted values. With a pasted job description, every recognised skill in it counts as required and the preferred share is scored the same way as required.</p></div>
+<div class="card"><h2>Model probability vs. suitability</h2>
+<p>These are different things and are never mixed:</p>
+<ul class="plain">
+<li><strong>Model probability</strong>: how strongly the classifier favours the predicted <em>category</em>. Produced by a probabilistic classifier (calibrated if an SVM is used).</li>
+<li><strong>Suitability score</strong>: a transparent heuristic for how much of the target's requirements your resume evidences.</li>
+<li>Neither is the chance of getting a job, and neither is a hiring decision.</li>
+</ul></div>
+</section>
+
+<section class="card prose"><h2>Limits you should know about</h2><ul>
+<li>A skill missing from the report may be present in your resume but phrased differently, or lost in PDF extraction. Treat "missing" as "not evidenced".</li>
+<li>Multi-column and heavily designed layouts can scramble reading order and hide sections.</li>
+<li>The classifier ships trained on synthetic demonstration data (see <a href="{{ url_for('model_performance') }}">Model performance</a>).</li>
+<li>No deep learning is used. Sentence-transformer or BERT models could be added if you have enough real labelled data.</li>
+<li>Privacy: the PDF is saved to a temporary file only while it is parsed, then deleted. The server stores no resumes or extracted text.</li>
+</ul></section>
+{% endblock %}

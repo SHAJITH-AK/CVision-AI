@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <h1>See how your resume reads to the role you want.</h1>
+    <p class="lead">Upload a PDF resume, pick a target role or paste a job description, and get a skill-gap report with a transparent suitability score.</p>
+    <div class="actions">
+      <a class="btn primary" href="{{ url_for('analyze_page') }}">Analyze a resume</a>
+      <a class="btn ghost" href="{{ url_for('about') }}">How scores are calculated</a>
+    </div>
+  </div>
+  <figure class="hero-demo" aria-label="Example of what the report shows">
+    <div class="ring" style="--p:72"><span>72</span></div>
+    <figcaption>
+      <strong>Suitability score</strong>
+      <span>A weighted blend of skill coverage, text similarity, experience and education evidence.</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="steps" aria-label="How it works">
+  <ol>
+    <li><h2>Upload</h2><p>Drop in a text-based PDF. Scanned image PDFs are detected and explained.</p></li>
+    <li><h2>Choose a target</h2><p>Select one of eight roles, or paste a real job description.</p></li>
+    <li><h2>Read the report</h2><p>Matched and missing skills, evidence from your own text, and what to add next.</p></li>
+  </ol>
+</section>
+
+<section class="card callout">
+  <h2>What this is, and isn't</h2>
+  <p>The job-category prediction comes from a TF-IDF + linear classifier (classical machine learning, not deep learning). The suitability score is a documented heuristic, not a trained model and not a hiring decision. See <a href="{{ url_for('model_performance') }}">Model performance</a> for the measured results and limits.</p>
+</section>
+{% endblock %}

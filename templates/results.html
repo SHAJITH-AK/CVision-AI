@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<div id="empty" class="card empty big" hidden>
+  <h1>No results yet</h1>
+  <p>Results are kept only in this browser tab. Analyze a resume to see your report.</p>
+  <a class="btn primary" href="{{ url_for('analyze_page') }}">Analyze a resume</a>
+</div>
+
+<div id="report" hidden>
+  <header class="page-head">
+    <h1>Resume report</h1>
+    <p id="meta" class="muted"></p>
+  </header>
+  <div class="alert warn" id="jdWarn" hidden></div>
+
+  <section class="summary" aria-label="Prediction summary">
+    <div class="card score-card">
+      <div class="ring" id="scoreRing" role="img"><span id="scoreNum">–</span></div>
+      <div>
+        <h2 class="h3">Suitability score</h2>
+        <p class="muted" id="scoreSub"></p>
+      </div>
+    </div>
+    <div class="card"><h2 class="h3">Predicted category</h2><p class="big-text" id="predCat"></p>
+      <p class="muted" id="predTop"></p></div>
+    <div class="card"><h2 class="h3">Model probability</h2><p class="big-text" id="predProb"></p>
+      <p class="muted" id="probNote"></p></div>
+    <div class="card"><h2 class="h3">Target</h2><p class="big-text" id="targetRole"></p>
+      <p class="muted" id="targetBasis"></p></div>
+  </section>
+
+  <section class="card"><h2>Why this result</h2><ul id="explain" class="plain"></ul></section>
+
+  <section class="grid-3">
+    <div class="card"><h2 class="h3">Required skills matched</h2><div class="chart"><canvas id="chDonut" aria-label="Matched versus missing required skills"></canvas></div></div>
+    <div class="card"><h2 class="h3">Score components (0–100 each)</h2><div class="chart"><canvas id="chComp" aria-label="Skills coverage and score components"></canvas></div></div>
+    <div class="card"><h2 class="h3">Fit across roles</h2><div class="chart"><canvas id="chRoles" aria-label="Suitability across supported roles"></canvas></div></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="card"><h2>Matched skills</h2><ul class="chips good" id="matched"></ul>
+      <h2 class="h3 mt">Preferred skills found</h2><ul class="chips good" id="prefMatched"></ul></div>
+    <div class="card"><h2>Missing or not evidenced</h2><ul class="chips bad" id="missing"></ul>
+      <h2 class="h3 mt">Preferred skills not found</h2><ul class="chips bad" id="prefMissing"></ul></div>
+    <div class="card"><h2>Technical skills in your resume</h2><ul class="chips" id="tech"></ul></div>
+    <div class="card"><h2>Soft skills mentioned</h2><ul class="chips" id="soft"></ul>
+      <h2 class="h3 mt">Skills to develop next</h2><ul class="chips" id="suggested"></ul></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="card"><h2>Resume quality checks</h2><ul class="checks" id="checks"></ul><p class="muted" id="qualNote"></p></div>
+    <div class="card"><h2>Evidence from your resume</h2><ul class="evidence" id="evidence"></ul></div>
+  </section>
+
+  <section class="card"><h2>Suggestions</h2><ul class="plain" id="suggestions"></ul></section>
+
+  <section class="card method"><h2 class="h3">How the score is calculated</h2><div id="method"></div>
+    <p class="muted" id="disclaimer"></p></section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
+{% endblock %}
